@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+<title>Flask MongoDB CRUD</title>
+</head>
+
+<body>
+
+<h2>User CRUD (Flask + MongoDB)</h2>
+
+<input id="name" placeholder="Name">
+<input id="email" placeholder="Email">
+<input id="age" placeholder="Age">
+
+<button id="addBtn" onclick="addUser()">Add User</button>
+
+<h3>Users</h3>
+<ul id="users"></ul>
+
+<script>
+
+const API = "http://127.0.0.1:5000/users";
+
+function loadUsers(){
+ fetch(API)
+ .then(res => res.json())
+ .then(data => {
+
+  let list="";
+
+  data.forEach(u=>{
+   list += `<li>
+   ${u.name} (${u.age})
+   <button onclick="editUser('${u._id}','${u.name}','${u.email}','${u.age}')">Edit</button>
+   <button onclick="deleteUser('${u._id}')">Delete</button>
+   </li>`;
+  });
+
+  document.getElementById("users").innerHTML=list;
+
+ });
+}
+
+function addUser(){
+
+ fetch(API,{
+  method:"POST",
+  headers:{"Content-Type":"application/json"},
+  body:JSON.stringify({
+   name:document.getElementById("name").value,
+   email:document.getElementById("email").value,
+   age:Number(document.getElementById("age").value)
+  })
+ }).then(()=>loadUsers());
+
+}
+
+function deleteUser(id){
+
+ fetch(API+"/"+id,{
+  method:"DELETE"
+ }).then(()=>loadUsers());
+
+}
+
+function editUser(id,name,email,age){
+
+ document.getElementById("name").value=name;
+ document.getElementById("email").value=email;
+ document.getElementById("age").value=age;
+
+ document.getElementById("addBtn").onclick=function(){
+  updateUser(id);
+ }
+
+}
+
+function updateUser(id){
+
+ fetch(API+"/"+id,{
+  method:"PUT",
+  headers:{"Content-Type":"application/json"},
+  body:JSON.stringify({
+   name:document.getElementById("name").value,
+   email:document.getElementById("email").value,
+   age:Number(document.getElementById("age").value)
+  })
+ }).then(()=>{
+  loadUsers();
+  document.getElementById("addBtn").onclick=addUser;
+ });
+
+}
+
+loadUsers();
+
+</script>
+
+</body>
+
+</html>
